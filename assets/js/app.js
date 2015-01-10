@@ -39,11 +39,8 @@ function init() {
 
     scene = new THREE.Scene();
 
-    var ambient = new THREE.AmbientLight(0x444444);
-    scene.add(ambient);
-
-    var directionalLight = new THREE.DirectionalLight(0xffeedd);
-    directionalLight.position.set(0, 0, 1).normalize();
+    var directionalLight = new THREE.DirectionalLight(0xffeedd, 0.2);
+    directionalLight.position.set(50, 25, 1).normalize();
     scene.add(directionalLight);
 
     geometry = new THREE.BoxGeometry(200, 200, 200);
@@ -59,12 +56,17 @@ function init() {
 
     // --- Continue from here ---
     objLoader.load(assets_url + '/models/' + modelName + '/' + modelName + '.obj', assets_url + '/models/' + modelName + '/' + modelName + '.mtl', function (object) {
+        object.traverse(function(object){
+            if( object.material ){
+                object.material.emissive.set('white')
+            }
+        });
         object.position.y = -80;
         scene.add(object);
 
     }, onProgress, onError);
 
-    renderer = new THREE.WebGLRenderer({canvas: visualizer});
+    renderer = new THREE.WebGLRenderer({canvas: visualizer, antialias: true});
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor(0x5FB6C9, 1);
 
