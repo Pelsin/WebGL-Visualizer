@@ -1,7 +1,10 @@
 var camera, scene, renderer;
 var geometry, material, cubeVisualizer;
-var cubeHolder = [];
+var lineHolderArr = [];
+var cubeHolderArr = [];
 var mouseX = 0, mouseY = 0;
+
+var time = 0;
 
 var windowHalfX = window.innerWidth / 2;
 var windowHalfY = window.innerHeight / 2;
@@ -10,6 +13,7 @@ var visualizer = document.getElementById("visualizer");
 var player = document.getElementById('player');
 
 var cubeQuantity = 127;
+var lineCreateFPS = 6;
 
 // Soundcloud settings
 var soundcloud = {
@@ -19,47 +23,60 @@ var soundcloud = {
 
 function init() {
 
-    camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 1, 2000);
+    camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 1, 2400);
     camera.position.z = 600;
 
     scene = new THREE.Scene();
 
-    for (var i = cubeQuantity - 1; i >= 0; i--) {
-
-        geometry = new THREE.BoxGeometry(20, 200, 200);
-        material = new THREE.MeshBasicMaterial({
-            color: shadeColor('ff0000', i),
-            wireframe: true
-        });
-
-        cubeVisualizer = new THREE.Mesh(geometry, material);
-        cubeVisualizer.position.x = -2000 + i * 50 ;
-
-        cubeHolder.push(cubeVisualizer);
-
-        scene.add(cubeVisualizer);
-    };
-   
-
     renderer = new THREE.WebGLRenderer({canvas: visualizer, antialias: true});
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(0xfffffff, 1);
+    renderer.setClearColor(0x000000, 1);
 
     document.addEventListener('mousemove', onDocumentMouseMove, false);
 }
 
 function render() {
+
     requestAnimationFrame(render);
-    camera.position.x += ( - mouseX - camera.position.x ) * .20;
-    camera.position.y += ( mouseY - camera.position.y ) * .20;
+    //camera.position.x += 500 + ( - mouseX - camera.position.x ) * .20;
+    camera.position.y += 50 + ( mouseY - camera.position.y ) * .20;
+    camera.position.z = 400 + (time / lineCreateFPS) * 70;
+    camera.lookAt({x: 0, y: 0, z: (time / lineCreateFPS) * 70});
 
-    camera.lookAt(scene.position);
+    if( time % lineCreateFPS == 0 ) {
+        cubeHolderArr = []
 
-    for(i in cubeHolder){
-        cubeHolder[i].scale.y = audioSource.streamData[i] / 100;
+        for (var i = cubeQuantity - 1; i >= 0; i--) {
+
+            geometry = new THREE.BoxGeometry(20, 30, 10);
+            material = new THREE.MeshBasicMaterial({
+                color: shadeColor('ff0000', i),
+                wireframe: true
+            });
+
+            cubeVisualizer = new THREE.Mesh(geometry, material);
+            cubeVisualizer.position.x = -2000 + i * 40 ;
+            cubeVisualizer.position.z = (time / lineCreateFPS) * 70 ;
+            cubeVisualizer.scale.y = 0.1 + audioSource.streamData[i] / 20;
+
+            cubeHolderArr.push(cubeVisualizer);
+
+            scene.add(cubeVisualizer);
+        };
+
+        lineHolderArr.push(cubeHolderArr);
+
+        if(lineHolderArr.length > 20) {
+            for(i in lineHolderArr[0]){
+                scene.remove(lineHolderArr[0][i]);
+            }
+            lineHolderArr.shift();
+            console.log(lineHolderArr.length);
+        }
     }
 
     renderer.render(scene, camera);
+    time++;
     
 }
 
