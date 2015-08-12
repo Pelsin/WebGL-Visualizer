@@ -1,5 +1,6 @@
 var camera, scene, renderer;
-var geometry, material, mesh;
+var geometry, material, cubeVisualizer;
+var cubeHolder = [];
 var mouseX = 0, mouseY = 0;
 
 var windowHalfX = window.innerWidth / 2;
@@ -8,67 +9,41 @@ var windowHalfY = window.innerHeight / 2;
 var visualizer = document.getElementById("visualizer");
 var player = document.getElementById('player');
 
+var cubeQuantity = 127;
+
 // Soundcloud settings
 var soundcloud = {
     client_id: "87ee0a4c261efe6aebf22dfc94777af3",
-    request_url: "https://soundcloud.com/stasoline/bring-it-on-wip"
-};
-
-var modelName = 'SpaceFighter01';
-var assets_url = document.URL + 'assets';
-
-// Download Handlers
-THREE.Loader.Handlers.add(/\.dds$/i, new THREE.DDSLoader());
-var objLoader = new THREE.OBJMTLLoader();
-
-// Download Handlers
-var onProgress = function (xhr) {
-    if (xhr.lengthComputable) {
-        var percentComplete = xhr.loaded / xhr.total * 100;
-        console.log(Math.round(percentComplete, 2) + '% downloaded');
-    }
-};
-
-var onError = function (xhr) {
+    request_url: "https://soundcloud.com/user8585647/power-of-darkness-2"
 };
 
 function init() {
 
     camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 1, 2000);
-    camera.position.z = 250;
+    camera.position.z = 600;
 
     scene = new THREE.Scene();
 
-    var directionalLight = new THREE.DirectionalLight(0xffeedd, 0.2);
-    directionalLight.position.set(50, 25, 1).normalize();
-    scene.add(directionalLight);
+    for (var i = cubeQuantity - 1; i >= 0; i--) {
 
-    geometry = new THREE.BoxGeometry(200, 200, 200);
-    material = new THREE.MeshBasicMaterial({
-        color: 0xff0000,
-        wireframe: true
-    });
-
-    mesh = new THREE.Mesh(geometry, material);
-    mesh.position.z = -400;
-
-    scene.add(mesh);
-
-    // --- Continue from here ---
-    objLoader.load(assets_url + '/models/' + modelName + '/' + modelName + '.obj', assets_url + '/models/' + modelName + '/' + modelName + '.mtl', function (object) {
-        object.traverse(function(object){
-            if( object.material ){
-                object.material.emissive.set('white')
-            }
+        geometry = new THREE.BoxGeometry(20, 200, 200);
+        material = new THREE.MeshBasicMaterial({
+            color: shadeColor('ff0000', i),
+            wireframe: true
         });
-        object.position.y = -80;
-        scene.add(object);
 
-    }, onProgress, onError);
+        cubeVisualizer = new THREE.Mesh(geometry, material);
+        cubeVisualizer.position.x = -2000 + i * 50 ;
+
+        cubeHolder.push(cubeVisualizer);
+
+        scene.add(cubeVisualizer);
+    };
+   
 
     renderer = new THREE.WebGLRenderer({canvas: visualizer, antialias: true});
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(0x5FB6C9, 1);
+    renderer.setClearColor(0xfffffff, 1);
 
     document.addEventListener('mousemove', onDocumentMouseMove, false);
 }
@@ -80,16 +55,18 @@ function render() {
 
     camera.lookAt(scene.position);
 
-    mesh.scale.x = audioSource.volume / 2000;
+    for(i in cubeHolder){
+        cubeHolder[i].scale.y = audioSource.streamData[i] / 100;
+    }
+
     renderer.render(scene, camera);
-    console.log(audioSource);
+    
 }
 
 function onDocumentMouseMove(event) {
 
     mouseX = ( event.clientX - windowHalfX ) / 2;
     mouseY = ( event.clientY - windowHalfY ) / 2;
-
 }
 
 SC.initialize({
@@ -102,6 +79,7 @@ SC.get('/resolve', { url: soundcloud.request_url }, function (response) {
     } else {
         console.log(response);
         player.setAttribute('src', response.stream_url + '?client_id=' + soundcloud.client_id);
+        player.crossOrigin = "anonymous";
         player.play();
     }
 });
@@ -128,6 +106,15 @@ var SoundCloudAudioSource = function (player) {
     this.volume = 0;
     this.streamData = new Uint8Array(128);
 };
+
+function shadeColor(color, percent) {  
+    var num = parseInt(color,16),
+    amt = Math.round(2.55 * percent),
+    R = (num >> 16) + amt,
+    G = (num >> 8 & 0x00FF) + amt,
+    B = (num & 0x0000FF) + amt;
+    return (0x1000000 + (R<255?R<1?0:R:255)*0x10000 + (G<255?G<1?0:G:255)*0x100 + (B<255?B<1?0:B:255));
+}
 
 var audioSource = new SoundCloudAudioSource(player);
 
