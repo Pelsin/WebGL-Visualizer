@@ -26,7 +26,7 @@ function init() {
 
     for (var i = cubeQuantity - 1; i >= 0; i--) {
 
-        geometry = new THREE.BoxGeometry(20, 200, 200);
+        geometry = new THREE.CircleGeometry(5, 32);
         material = new THREE.MeshBasicMaterial({
             color: shadeColor('ff0000', i),
             wireframe: true
