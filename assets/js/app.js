@@ -29,7 +29,7 @@ function init() {
         geometry = new THREE.CircleGeometry(5, 32);
         material = new THREE.MeshBasicMaterial({
             color: shadeColor('ff0000', i),
-            wireframe: true
+            wireframe: false
         });
 
         cubeVisualizer = new THREE.Mesh(geometry, material);
@@ -56,7 +56,7 @@ function render() {
     camera.lookAt(scene.position);
 
     for(i in cubeHolder){
-        cubeHolder[i].scale.y = audioSource.streamData[i] / 100;
+        cubeHolder[i].scale.y = 0.1 + audioSource.streamData[i];
     }
 
     renderer.render(scene, camera);
