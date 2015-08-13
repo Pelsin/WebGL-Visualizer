@@ -13,24 +13,26 @@ var visualizer = document.getElementById("visualizer");
 var player = document.getElementById('player');
 
 var cubeQuantity = 127;
-var lineCreateFPS = 6;
+var lineCreateFPS = 3;
 
 // Soundcloud settings
 var soundcloud = {
     client_id: "87ee0a4c261efe6aebf22dfc94777af3",
-    request_url: "https://soundcloud.com/user8585647/power-of-darkness-2"
+    request_url: "https://soundcloud.com/stephan-ls-caretrey/john-dreamer-becoming-a-legend"
 };
 
 function init() {
 
     camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 1, 2400);
-    camera.position.z = 600;
+    camera.position.z = 400;
 
     scene = new THREE.Scene();
 
     renderer = new THREE.WebGLRenderer({canvas: visualizer, antialias: true});
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor(0x000000, 1);
+
+    geometry = new THREE.CircleGeometry( 5, 32 );
 
     document.addEventListener('mousemove', onDocumentMouseMove, false);
 }
@@ -39,8 +41,8 @@ function render() {
 
     requestAnimationFrame(render);
     //camera.position.x += 500 + ( - mouseX - camera.position.x ) * .20;
-    camera.position.y += 50 + ( mouseY - camera.position.y ) * .20;
-    camera.position.z = 400 + (time / lineCreateFPS) * 70;
+    camera.position.y += 100 + ( mouseY - camera.position.y ) * .20;
+    camera.position.z = -400 + (time / lineCreateFPS) * 70;
     camera.lookAt({x: 0, y: 0, z: (time / lineCreateFPS) * 70});
 
     if( time % lineCreateFPS == 0 ) {
@@ -48,31 +50,33 @@ function render() {
 
         for (var i = cubeQuantity - 1; i >= 0; i--) {
 
-            geometry = new THREE.BoxGeometry(20, 30, 10);
+            
             material = new THREE.MeshBasicMaterial({
-                color: shadeColor('ff0000', i),
+                color: 0xff0000,
                 wireframe: true
             });
 
             cubeVisualizer = new THREE.Mesh(geometry, material);
-            cubeVisualizer.position.x = -2000 + i * 40 ;
+            cubeVisualizer.position.x = -950 + i * 15 ;
             cubeVisualizer.position.z = (time / lineCreateFPS) * 70 ;
-            cubeVisualizer.scale.y = 0.1 + audioSource.streamData[i] / 20;
+            cubeVisualizer.scale.y = 0.1 + audioSource.streamData[i] / 5;
 
             cubeHolderArr.push(cubeVisualizer);
 
             scene.add(cubeVisualizer);
+
         };
 
         lineHolderArr.push(cubeHolderArr);
 
-        if(lineHolderArr.length > 20) {
+        if(lineHolderArr.length > 30) {
             for(i in lineHolderArr[0]){
                 scene.remove(lineHolderArr[0][i]);
+                material.dispose();
             }
             lineHolderArr.shift();
-            console.log(lineHolderArr.length);
         }
+        
     }
 
     renderer.render(scene, camera);
