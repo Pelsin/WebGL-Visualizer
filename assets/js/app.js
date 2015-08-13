@@ -12,7 +12,13 @@ var windowHalfY = window.innerHeight / 2;
 var visualizer = document.getElementById("visualizer");
 var player = document.getElementById('player');
 
-var cubeQuantity = 127;
+var visualizerElement = {
+    quantity: 100,
+    radius: 5,
+    segments: 10,
+    material: new THREE.MeshBasicMaterial({color: 0xff6B6B, wireframe: true})
+};
+var visualizerEleQuantity = 100;
 var lineCreateFPS = 3;
 var lineDistance = 25;
 
@@ -33,7 +39,7 @@ function init() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor(0xfffffff, 1);
 
-    geometry = new THREE.CircleGeometry( 8, 32 );
+    geometry = new THREE.CircleGeometry( visualizerElement.radius, visualizerElement.segments );
 
     document.addEventListener('mousemove', onDocumentMouseMove, false);
 }
@@ -42,25 +48,20 @@ function render() {
 
     requestAnimationFrame(render);
     //camera.position.x += 500 + ( - mouseX - camera.position.x ) * .20;
-    camera.position.y += 100 + ( mouseY - camera.position.y ) * .20;
+    camera.position.y += 50 + ( mouseY - camera.position.y ) * .20;
     camera.position.z = -400 + (time / lineCreateFPS) * lineDistance;
     camera.lookAt({x: 0, y: 0, z: (time / lineCreateFPS) * lineDistance});
 
     if( time % lineCreateFPS == 0 ) {
         cubeHolderArr = []
 
-        for (var i = cubeQuantity - 1; i >= 0; i--) {
+        for (i = 0; i < visualizerElement.quantity; i++) {
 
-            
-            material = new THREE.MeshBasicMaterial({
-                color: 0x6B6B6B,
-                wireframe: true
-            });
+            cubeVisualizer = new THREE.Mesh(geometry, visualizerElement.material);
+            cubeVisualizer.position.x = -750 + i * 15 ;
 
-            cubeVisualizer = new THREE.Mesh(geometry, material);
-            cubeVisualizer.position.x = -950 + i * 15 ;
             cubeVisualizer.position.z = (time / lineCreateFPS) * lineDistance ;
-            cubeVisualizer.scale.y = 0.1 + audioSource.streamData[i] / 5;
+            cubeVisualizer.scale.y = 0.1 + audioSource.streamData[i] / 15;
 
             cubeHolderArr.push(cubeVisualizer);
 
@@ -73,7 +74,7 @@ function render() {
         if(lineHolderArr.length > 24) {
             for(i in lineHolderArr[0]){
                 scene.remove(lineHolderArr[0][i]);
-                material.dispose();
+                
             }
             lineHolderArr.shift();
         }
