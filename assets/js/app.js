@@ -1,7 +1,7 @@
 var camera, scene, renderer;
 var geometry, material, cubeVisualizer;
 var cubeHolder = [];
-var mouseX = 0, mouseY = 0;
+//var mouseX = 0, mouseY = 0;
 
 var windowHalfX = window.innerWidth / 2;
 var windowHalfY = window.innerHeight / 2;
@@ -24,16 +24,20 @@ function init() {
 
     scene = new THREE.Scene();
 
+    controls = new THREE.OrbitControls( camera );
+    controls.damping = 0.2;
+    controls.addEventListener( 'change', render.domElement )
+
     for (var i = cubeQuantity - 1; i >= 0; i--) {
 
-        geometry = new THREE.CircleGeometry(5, 32);
+        geometry = new THREE.CircleGeometry(10, 30);
         material = new THREE.MeshBasicMaterial({
             color: shadeColor('ff0000', i),
-            wireframe: false
+            wireframe: true
         });
 
         cubeVisualizer = new THREE.Mesh(geometry, material);
-        cubeVisualizer.position.x = -2000 + i * 50 ;
+        cubeVisualizer.position.x = -500 + i * 10;
 
         cubeHolder.push(cubeVisualizer);
 
@@ -43,31 +47,33 @@ function init() {
 
     renderer = new THREE.WebGLRenderer({canvas: visualizer, antialias: true});
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(0xfffffff, 1);
+    renderer.setClearColor(0xfffffff, 10);
 
-    document.addEventListener('mousemove', onDocumentMouseMove, false);
+    //document.addEventListener('mousemove', onDocumentMouseMove, false);
 }
 
 function render() {
     requestAnimationFrame(render);
-    camera.position.x += ( - mouseX - camera.position.x ) * .20;
-    camera.position.y += ( mouseY - camera.position.y ) * .20;
+    //camera.position.x += ( - mouseX - camera.position.x ) * .20;
+    //camera.position.y += ( mouseY - camera.position.y ) * .20;
 
     camera.lookAt(scene.position);
 
     for(i in cubeHolder){
-        cubeHolder[i].scale.y = 0.1 + audioSource.streamData[i];
+        cubeHolder[i].scale.y = 0.1 + audioSource.streamData[i] / 10;
     }
 
     renderer.render(scene, camera);
     
 }
 
+/*
 function onDocumentMouseMove(event) {
 
     mouseX = ( event.clientX - windowHalfX ) / 2;
     mouseY = ( event.clientY - windowHalfY ) / 2;
 }
+*/
 
 SC.initialize({
     client_id: soundcloud.client_id
