@@ -16,7 +16,7 @@ var visualizerElement = {
     quantity: 100,
     radius: 5,
     segments: 10,
-    material: new THREE.MeshBasicMaterial({color: 0xff6B6B, wireframe: true})
+    material: new THREE.MeshBasicMaterial({color: 0xD3D3D3, wireframe: true})
 };
 var visualizerEleQuantity = 100;
 var lineCreateFPS = 3;
@@ -47,8 +47,8 @@ function init() {
 function render() {
 
     requestAnimationFrame(render);
-    //camera.position.x += 500 + ( - mouseX - camera.position.x ) * .20;
-    camera.position.y += 50 + ( mouseY - camera.position.y ) * .20;
+    camera.position.x += ( - mouseX - camera.position.x ) * .20;
+    camera.position.y += ( mouseY - camera.position.y ) * .20;
     camera.position.z = -400 + (time / lineCreateFPS) * lineDistance;
     camera.lookAt({x: 0, y: 0, z: (time / lineCreateFPS) * lineDistance});
 
@@ -58,10 +58,17 @@ function render() {
         for (i = 0; i < visualizerElement.quantity; i++) {
 
             cubeVisualizer = new THREE.Mesh(geometry, visualizerElement.material);
-            cubeVisualizer.position.x = -750 + i * 15 ;
+            
+            // Line visualizer
+            //cubeVisualizer.position.x = -750 + i * 15 ;
+
+            // Circle visualizer
+            cubeVisualizer.position.x = 100 * Math.cos(2 * Math.PI * i / visualizerElement.quantity);
+            cubeVisualizer.position.y = 100 * Math.sin(2 * Math.PI * i / visualizerElement.quantity);
+            cubeVisualizer.rotation.z = (((Math.PI * 2) / visualizerElement.quantity) * i) + Math.PI / 2;
 
             cubeVisualizer.position.z = (time / lineCreateFPS) * lineDistance ;
-            cubeVisualizer.scale.y = 0.1 + audioSource.streamData[i] / 15;
+            cubeVisualizer.scale.y = 0.1 + audioSource.streamData[i] / 25;
 
             cubeHolderArr.push(cubeVisualizer);
 
@@ -73,8 +80,7 @@ function render() {
 
         if(lineHolderArr.length > 24) {
             for(i in lineHolderArr[0]){
-                scene.remove(lineHolderArr[0][i]);
-                
+                scene.remove(lineHolderArr[0][i]);                
             }
             lineHolderArr.shift();
         }
