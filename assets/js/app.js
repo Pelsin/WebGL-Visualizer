@@ -16,7 +16,7 @@ var visualizerElement = {
     quantity: 100,
     radius: 5,
     segments: 10,
-    material: new THREE.MeshBasicMaterial({color: 0xD3D3D3, wireframe: true})
+    material: new THREE.MeshBasicMaterial({color: 0x605d5d, wireframe: true})
 };
 var visualizerEleQuantity = 100;
 var lineCreateFPS = 3;
