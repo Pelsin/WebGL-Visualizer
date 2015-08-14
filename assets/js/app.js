@@ -30,14 +30,14 @@ function init() {
 
     for (var i = cubeQuantity - 1; i >= 0; i--) {
 
-        geometry = new THREE.CircleGeometry(10, 30);
+        geometry = new THREE.CircleGeometry(15, 50);
         material = new THREE.MeshBasicMaterial({
             color: shadeColor('ff0000', i),
             wireframe: true
         });
 
         cubeVisualizer = new THREE.Mesh(geometry, material);
-        cubeVisualizer.position.x = -500 + i * 10;
+        cubeVisualizer.position.z = -500 + i * 10;
 
         cubeHolder.push(cubeVisualizer);
 
@@ -47,7 +47,7 @@ function init() {
 
     renderer = new THREE.WebGLRenderer({canvas: visualizer, antialias: true});
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(0xfffffff, 10);
+    renderer.setClearColor(0x000000, 10);
 
     //document.addEventListener('mousemove', onDocumentMouseMove, false);
 }
@@ -60,7 +60,7 @@ function render() {
     camera.lookAt(scene.position);
 
     for(i in cubeHolder){
-        cubeHolder[i].scale.y = 0.1 + audioSource.streamData[i] / 10;
+        cubeHolder[i].scale.y = 0.1 + audioSource.streamData[i] / 40;
     }
 
     renderer.render(scene, camera);
