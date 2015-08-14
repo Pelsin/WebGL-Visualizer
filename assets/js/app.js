@@ -1,6 +1,7 @@
 var camera, scene, renderer;
 var geometry, material, cubeVisualizer;
 var cubeHolder = [];
+var particleHolder = [];
 //var mouseX = 0, mouseY = 0;
 
 var windowHalfX = window.innerWidth / 2;
@@ -27,7 +28,7 @@ function init() {
     controls = new THREE.OrbitControls( camera );
     controls.damping = 0.2;
     controls.addEventListener( 'change', render.domElement )
-
+   
     for (var i = cubeQuantity - 1; i >= 0; i--) {
 
         geometry = new THREE.CircleGeometry(15, 50);
@@ -37,13 +38,23 @@ function init() {
         });
 
         cubeVisualizer = new THREE.Mesh(geometry, material);
-        cubeVisualizer.position.z = -500 + i * 10;
 
-        cubeHolder.push(cubeVisualizer);
+        if(i % 2 == 0) {
+            cubeVisualizer.position.x = Math.random() * 500;
+            cubeVisualizer.position.y = Math.random() * 500;
+            cubeVisualizer.position.z = Math.random() * 500;
+        }
+        else {
+            cubeVisualizer.position.x = Math.random() * -500;
+            cubeVisualizer.position.y = Math.random() * -500;
+            cubeVisualizer.position.z = Math.random() * -500;
+        }
+
+
+        particleHolder.push(cubeVisualizer);
 
         scene.add(cubeVisualizer);
     };
-   
 
     renderer = new THREE.WebGLRenderer({canvas: visualizer, antialias: true});
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -59,8 +70,10 @@ function render() {
 
     camera.lookAt(scene.position);
 
-    for(i in cubeHolder){
-        cubeHolder[i].scale.y = 0.1 + audioSource.streamData[i] / 40;
+    for(i in particleHolder){
+        particleHolder[i].scale.y = 0.1 + audioSource.streamData[i] / 50;
+        particleHolder[i].scale.x = 0.1 + audioSource.streamData[i] / 50;
+        particleHolder[i].scale.z = 0.1 + audioSource.streamData[i] / 50;
     }
 
     renderer.render(scene, camera);
