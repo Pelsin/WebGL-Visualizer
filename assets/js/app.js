@@ -2,7 +2,7 @@ var camera, scene, renderer;
 var geometry, material, cubeVisualizer;
 var cubeHolder = [];
 var particleHolder = [];
-//var mouseX = 0, mouseY = 0;
+var mouseX = 0, mouseY = 0;
 
 var windowHalfX = window.innerWidth / 2;
 var windowHalfY = window.innerHeight / 2;
@@ -21,20 +21,19 @@ var soundcloud = {
 function init() {
 
     camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 1, 2000);
-    camera.position.z = 600;
+    camera.position.z = 1000;
+    camera.position.y = -1000;
+    
 
     scene = new THREE.Scene();
-
-    controls = new THREE.OrbitControls( camera );
-    controls.damping = 0.2;
-    controls.addEventListener( 'change', render.domElement )
    
     for (var i = cubeQuantity - 1; i >= 0; i--) {
 
-        particleGeometry = new THREE.CircleGeometry(10, 10);
+        particleGeometry = new THREE.CircleGeometry(30, 30);
         particleMaterial = new THREE.MeshBasicMaterial({
             color: shadeColor('ff0000', i),
-            wireframe: false
+            wireframe: false,
+            reflection: 1
         });
 
         cubeGeometry = new THREE.BoxGeometry(10, 10, 10);
@@ -46,9 +45,9 @@ function init() {
         particleVisualizer = new THREE.Mesh(particleGeometry, particleMaterial);
         soundWaveVisualizer = new THREE.Mesh(cubeGeometry, cubeMaterial);
 
-            particleVisualizer.position.x = Math.random() * (100 - 1500) + 550;
-            particleVisualizer.position.y = Math.random() * (100 - 1500) + 550;
-            particleVisualizer.position.z = Math.random() * (100 - 800) + 310;
+            particleVisualizer.position.x = Math.random() * (100 - 3000) + 1000;
+            particleVisualizer.position.y = Math.random() * (100 - 2000) + 800;
+            particleVisualizer.position.z = Math.random() * (50 - 500) + 310;
 
             soundWaveVisualizer.position.x = -500 + i * 10;
             soundWaveVisualizer.position.y = -1000;
@@ -66,13 +65,13 @@ function init() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor(0x000000, 10);
 
-    //document.addEventListener('mousemove', onDocumentMouseMove, false);
+    document.addEventListener('mousemove', onDocumentMouseMove, false);
 }
 
 function render() {
     requestAnimationFrame(render);
-    //camera.position.x += ( - mouseX - camera.position.x ) * .20;
-    //camera.position.y += ( mouseY - camera.position.y ) * .20;
+    camera.position.x += ( - mouseX - camera.position.x ) * .20;
+    camera.position.y += ( mouseY - camera.position.y ) * .20;
 
     camera.lookAt(scene.position);
 
@@ -83,7 +82,13 @@ function render() {
 
         particleHolder[i].position.x += audioSource.streamData[i] / 200;
 
-        if(particleHolder[i].position.x > 1200) {
+        particleHolder[i].scale.y = 0.1 + audioSource.streamData[i] / 300;
+        particleHolder[i].scale.x = 0.1 + audioSource.streamData[i] / 300;
+        particleHolder[i].scale.z = 0.1 + audioSource.streamData[i] / 300;
+
+
+
+        if(particleHolder[i].position.x > 1400) {
             particleHolder[i].position.x = -1000;
         }
     }
@@ -92,13 +97,13 @@ function render() {
     
 }
 
-/*
+
 function onDocumentMouseMove(event) {
 
     mouseX = ( event.clientX - windowHalfX ) / 2;
     mouseY = ( event.clientY - windowHalfY ) / 2;
 }
-*/
+
 
 SC.initialize({
     client_id: soundcloud.client_id
