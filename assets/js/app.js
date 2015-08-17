@@ -21,8 +21,8 @@ var soundcloud = {
 function init() {
 
     camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 1, 2000);
-    camera.position.z = 1000;
-    camera.position.y = -1000;
+    camera.position.z = 800;
+ 
     
 
     scene = new THREE.Scene();
@@ -45,8 +45,8 @@ function init() {
         particleVisualizer = new THREE.Mesh(particleGeometry, particleMaterial);
         soundWaveVisualizer = new THREE.Mesh(cubeGeometry, cubeMaterial);
 
-            particleVisualizer.position.x = Math.random() * (100 - 3000) + 1000;
-            particleVisualizer.position.y = Math.random() * (100 - 2000) + 800;
+            particleVisualizer.position.x = Math.random() * (1 - 4000) + 2000;
+            particleVisualizer.position.y = Math.random() * (10 - 2000) + 1000;
             particleVisualizer.position.z = Math.random() * (50 - 500) + 310;
 
             soundWaveVisualizer.position.x = -500 + i * 10;
@@ -76,9 +76,9 @@ function render() {
     camera.lookAt(scene.position);
 
     for(i in particleHolder){
-        cubeHolder[i].scale.y = 0.1 + audioSource.streamData[i];
-        cubeHolder[i].scale.x = 0.1 + audioSource.streamData[i] / 50;
-        cubeHolder[i].scale.z = 0.1 + audioSource.streamData[i] / 50;
+        cubeHolder[i].scale.y = 0.1 + audioSource.streamData[i] * 1.2;
+        cubeHolder[i].scale.x = 0.1 + audioSource.streamData[i] / 40;
+        cubeHolder[i].scale.z = 0.1 + audioSource.streamData[i] / 40;
 
         particleHolder[i].position.x += audioSource.streamData[i] / 200;
 
@@ -88,7 +88,7 @@ function render() {
 
 
 
-        if(particleHolder[i].position.x > 1400) {
+        if(particleHolder[i].position.x > 1750) {
             particleHolder[i].position.x = -1000;
         }
     }
