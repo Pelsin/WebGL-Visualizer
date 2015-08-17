@@ -31,29 +31,35 @@ function init() {
    
     for (var i = cubeQuantity - 1; i >= 0; i--) {
 
-        geometry = new THREE.CircleGeometry(15, 50);
-        material = new THREE.MeshBasicMaterial({
+        particleGeometry = new THREE.CircleGeometry(10, 10);
+        particleMaterial = new THREE.MeshBasicMaterial({
+            color: shadeColor('ff0000', i),
+            wireframe: false
+        });
+
+        cubeGeometry = new THREE.BoxGeometry(10, 10, 10);
+        cubeMaterial = new THREE.MeshBasicMaterial({
             color: shadeColor('ff0000', i),
             wireframe: true
         });
 
-        cubeVisualizer = new THREE.Mesh(geometry, material);
+        particleVisualizer = new THREE.Mesh(particleGeometry, particleMaterial);
+        soundWaveVisualizer = new THREE.Mesh(cubeGeometry, cubeMaterial);
 
-        if(i % 2 == 0) {
-            cubeVisualizer.position.x = Math.random() * 500;
-            cubeVisualizer.position.y = Math.random() * 500;
-            cubeVisualizer.position.z = Math.random() * 500;
-        }
-        else {
-            cubeVisualizer.position.x = Math.random() * -500;
-            cubeVisualizer.position.y = Math.random() * -500;
-            cubeVisualizer.position.z = Math.random() * -500;
-        }
+            particleVisualizer.position.x = Math.random() * (100 - 1500) + 550;
+            particleVisualizer.position.y = Math.random() * (100 - 1500) + 550;
+            particleVisualizer.position.z = Math.random() * (100 - 800) + 310;
+
+            soundWaveVisualizer.position.x = -500 + i * 10;
+            soundWaveVisualizer.position.y = -1000;
 
 
-        particleHolder.push(cubeVisualizer);
+        particleHolder.push(particleVisualizer);
+        cubeHolder.push(soundWaveVisualizer);
 
-        scene.add(cubeVisualizer);
+        scene.add(particleVisualizer);
+        scene.add(soundWaveVisualizer);
+       
     };
 
     renderer = new THREE.WebGLRenderer({canvas: visualizer, antialias: true});
@@ -71,9 +77,15 @@ function render() {
     camera.lookAt(scene.position);
 
     for(i in particleHolder){
-        particleHolder[i].scale.y = 0.1 + audioSource.streamData[i] / 50;
-        particleHolder[i].scale.x = 0.1 + audioSource.streamData[i] / 50;
-        particleHolder[i].scale.z = 0.1 + audioSource.streamData[i] / 50;
+        cubeHolder[i].scale.y = 0.1 + audioSource.streamData[i];
+        cubeHolder[i].scale.x = 0.1 + audioSource.streamData[i] / 50;
+        cubeHolder[i].scale.z = 0.1 + audioSource.streamData[i] / 50;
+
+        particleHolder[i].position.x += audioSource.streamData[i] / 200;
+
+        if(particleHolder[i].position.x > 1200) {
+            particleHolder[i].position.x = -1000;
+        }
     }
 
     renderer.render(scene, camera);
