@@ -1,9 +1,9 @@
 var camera, scene, renderer;
-var geometry, material, cubeVisualizer;
+var geometry, material, cubeVisualizer, particle;
 var cubeHolder = [];
 var particleHolder = [];
 var mouseX = 0, mouseY = 0;
-
+var radiansHeight, radiansWidth;
 var windowHalfX = window.innerWidth / 2;
 var windowHalfY = window.innerHeight / 2;
 
@@ -11,6 +11,7 @@ var visualizer = document.getElementById("visualizer");
 var player = document.getElementById('player');
 
 var cubeQuantity = 127;
+var sphereRadius = 1000;
 
 // Soundcloud settings
 var soundcloud = {
@@ -20,11 +21,9 @@ var soundcloud = {
 
 function init() {
 
-    camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 1, 2000);
+    camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 1, 7000);
     camera.position.z = 800;
- 
     
-
     scene = new THREE.Scene();
    
     for (var i = cubeQuantity - 1; i >= 0; i--) {
@@ -43,21 +42,28 @@ function init() {
         });
 
         particleVisualizer = new THREE.Mesh(particleGeometry, particleMaterial);
-        soundWaveVisualizer = new THREE.Mesh(cubeGeometry, cubeMaterial);
+        cubeVisualizer = new THREE.Mesh(cubeGeometry, cubeMaterial);
 
-            particleVisualizer.position.x = Math.random() * (1 - 4000) + 2000;
             particleVisualizer.position.y = Math.random() * (10 - 2000) + 1000;
-            particleVisualizer.position.z = Math.random() * (50 - 500) + 310;
 
-            soundWaveVisualizer.position.x = -500 + i * 10;
-            soundWaveVisualizer.position.y = -1000;
+            radiansHeight = (Math.random() * 360) * Math.PI / 180;
+            radiansWidth = (Math.random() * 360) * Math.PI / 180;
+
+            particleVisualizer.position.x = sphereRadius * Math.cos(radiansHeight) * Math.sin(radiansWidth);
+            particleVisualizer.position.y = sphereRadius * Math.sin(radiansHeight) * Math.sin(radiansWidth);
+            particleVisualizer.position.z = sphereRadius * Math.cos(radiansWidth);
+            particleVisualizer.radiansWidth = radiansWidth;
+            particleVisualizer.radiansHeight = radiansHeight;
+
+            cubeVisualizer.position.x = -500 + i * 10;
+            cubeVisualizer.position.y = -1000;
 
 
         particleHolder.push(particleVisualizer);
-        cubeHolder.push(soundWaveVisualizer);
+        cubeHolder.push(cubeVisualizer);
 
         scene.add(particleVisualizer);
-        scene.add(soundWaveVisualizer);
+        scene.add(cubeVisualizer);
        
     };
 
@@ -69,34 +75,35 @@ function init() {
 }
 
 function render() {
+    
     requestAnimationFrame(render);
     camera.position.x += ( - mouseX - camera.position.x ) * .20;
     camera.position.y += ( mouseY - camera.position.y ) * .20;
 
     camera.lookAt(scene.position);
 
-    for(i in particleHolder){
+    for(i in cubeHolder){
         cubeHolder[i].scale.y = 0.1 + audioSource.streamData[i] * 1.2;
         cubeHolder[i].scale.x = 0.1 + audioSource.streamData[i] / 40;
         cubeHolder[i].scale.z = 0.1 + audioSource.streamData[i] / 40;
+    }
 
-        particleHolder[i].position.x += audioSource.streamData[i] / 200;
+    for(i in particleHolder){
+        particle = particleHolder[i];
 
-        particleHolder[i].scale.y = 0.1 + audioSource.streamData[i] / 300;
-        particleHolder[i].scale.x = 0.1 + audioSource.streamData[i] / 300;
-        particleHolder[i].scale.z = 0.1 + audioSource.streamData[i] / 300;
+        particle.scale.y = particle.scale.x = particle.scale.z = 0.1 + audioSource.streamData[i] / 80;
+        particle.radiansHeight = particle.radiansHeight + (Math.random() ) / 200;
+        particle.radiansWidth = particle.radiansWidth + (Math.random() - 0.5) / 200;
 
-
-
-        if(particleHolder[i].position.x > 1750) {
-            particleHolder[i].position.x = -1000;
-        }
+        particle.position.x = (sphereRadius - audioSource.volume / 100) * Math.cos(particle.radiansHeight) * Math.sin(particle.radiansWidth);
+        particle.position.y = (sphereRadius - audioSource.volume / 100) * Math.sin(particle.radiansHeight) * Math.sin(particle.radiansWidth);
+        particle.position.z = (sphereRadius - audioSource.volume / 100) * Math.cos(particle.radiansWidth);
+        particle.lookAt(camera.position);
     }
 
     renderer.render(scene, camera);
     
 }
-
 
 function onDocumentMouseMove(event) {
 
