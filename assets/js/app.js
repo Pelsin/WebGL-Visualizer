@@ -1,6 +1,6 @@
 var camera, scene, renderer;
-var geometry, material, cubeVisualizer, particle;
-var cubeHolder = [];
+var geometry, material, particle, line;
+var lineHolder = [];
 var particleHolder = [];
 var mouseX = 0, mouseY = 0;
 var radiansHeight, radiansWidth;
@@ -10,7 +10,7 @@ var windowHalfY = window.innerHeight / 2;
 var visualizer = document.getElementById("visualizer");
 var player = document.getElementById('player');
 
-var cubeQuantity = 127;
+var particleQuantity = 127;
 var sphereRadius = 1000;
 
 // Soundcloud settings
@@ -21,51 +21,46 @@ var soundcloud = {
 
 function init() {
 
-    camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 1, 7000);
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 7000);
     camera.position.z = 800;
     
     scene = new THREE.Scene();
-   
-    for (var i = cubeQuantity - 1; i >= 0; i--) {
 
-        particleGeometry = new THREE.CircleGeometry(30, 30);
-        particleMaterial = new THREE.MeshBasicMaterial({
-            color: shadeColor('ff0000', i),
-            wireframe: false,
-            reflection: 1
-        });
+    particleGeometry = new THREE.CircleGeometry(30, 30);
+    geometry = new THREE.Geometry();
+    line = new THREE.Line(geometry, material);
 
-        cubeGeometry = new THREE.BoxGeometry(10, 10, 10);
-        cubeMaterial = new THREE.MeshBasicMaterial({
-            color: shadeColor('ff0000', i),
-            wireframe: true
-        });
+    var ambient = new THREE.AmbientLight( 0x555555 );
+    scene.add(ambient);
+
+    var light = new THREE.DirectionalLight( 0xffffff );
+    light.position = camera.position;
+    scene.add(light);
+
+
+
+    for (var i = particleQuantity - 1; i >= 0; i--) {
+
+        particleMaterial = new THREE.MeshBasicMaterial( {side:THREE.DoubleSide, map: THREE.ImageUtils.loadTexture('assets/img/flare.png'), depthWrite: false, depthTest: false, transparent: true });
 
         particleVisualizer = new THREE.Mesh(particleGeometry, particleMaterial);
-        cubeVisualizer = new THREE.Mesh(cubeGeometry, cubeMaterial);
 
-            particleVisualizer.position.y = Math.random() * (10 - 2000) + 1000;
+        particleVisualizer.radiansWidth = (Math.random() * 360) * Math.PI / 180;
+        particleVisualizer.radiansHeight = (Math.random() * 360) * Math.PI / 180;
 
-            radiansHeight = (Math.random() * 360) * Math.PI / 180;
-            radiansWidth = (Math.random() * 360) * Math.PI / 180;
+        particleVisualizer.position.x = sphereRadius * Math.cos(radiansHeight) * Math.sin(radiansWidth);
+        particleVisualizer.position.y = sphereRadius * Math.sin(radiansHeight) * Math.sin(radiansWidth);
+        particleVisualizer.position.z = sphereRadius * Math.cos(radiansWidth);
 
-            particleVisualizer.position.x = sphereRadius * Math.cos(radiansHeight) * Math.sin(radiansWidth);
-            particleVisualizer.position.y = sphereRadius * Math.sin(radiansHeight) * Math.sin(radiansWidth);
-            particleVisualizer.position.z = sphereRadius * Math.cos(radiansWidth);
-            particleVisualizer.radiansWidth = radiansWidth;
-            particleVisualizer.radiansHeight = radiansHeight;
-
-            cubeVisualizer.position.x = -500 + i * 10;
-            cubeVisualizer.position.y = -1000;
-
+        line.geometry.vertices[i] = new THREE.Vector3(-950 + i * 15, 0, 0);
 
         particleHolder.push(particleVisualizer);
-        cubeHolder.push(cubeVisualizer);
+        lineHolder.push(line.geometry.vertices[i]);
 
-        scene.add(particleVisualizer);
-        scene.add(cubeVisualizer);
-       
+        scene.add(particleVisualizer);  
     };
+
+    scene.add(line);
 
     renderer = new THREE.WebGLRenderer({canvas: visualizer, antialias: true});
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -82,10 +77,8 @@ function render() {
 
     camera.lookAt(scene.position);
 
-    for(i in cubeHolder){
-        cubeHolder[i].scale.y = 0.1 + audioSource.streamData[i] * 1.2;
-        cubeHolder[i].scale.x = 0.1 + audioSource.streamData[i] / 40;
-        cubeHolder[i].scale.z = 0.1 + audioSource.streamData[i] / 40;
+    for(i in lineHolder){
+        line.geometry.vertices[i].y = audioSource.streamData[i];
     }
 
     for(i in particleHolder){
@@ -100,7 +93,7 @@ function render() {
         particle.position.z = (sphereRadius - audioSource.volume / 100) * Math.cos(particle.radiansWidth);
         particle.lookAt(camera.position);
     }
-
+    line.geometry.verticesNeedUpdate = true;
     renderer.render(scene, camera);
     
 }
