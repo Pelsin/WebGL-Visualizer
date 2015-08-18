@@ -1,10 +1,8 @@
 var camera, scene, renderer;
 var geometry, material, cubeVisualizer;
-var lineHolderArr = [];
-var cubeHolderArr = [];
+var cubeHolder = [];
+var particleHolder = [];
 var mouseX = 0, mouseY = 0;
-
-var time = 0;
 
 var windowHalfX = window.innerWidth / 2;
 var windowHalfY = window.innerHeight / 2;
@@ -12,91 +10,100 @@ var windowHalfY = window.innerHeight / 2;
 var visualizer = document.getElementById("visualizer");
 var player = document.getElementById('player');
 
-var visualizerElement = {
-    quantity: 100,
-    radius: 5,
-    segments: 10,
-    material: new THREE.MeshBasicMaterial({color: 0x605d5d, wireframe: true})
-};
-var visualizerEleQuantity = 100;
-var lineCreateFPS = 3;
-var lineDistance = 25;
+var cubeQuantity = 127;
 
 // Soundcloud settings
 var soundcloud = {
     client_id: "87ee0a4c261efe6aebf22dfc94777af3",
-    request_url: "https://soundcloud.com/stephan-ls-caretrey/john-dreamer-becoming-a-legend"
+    request_url: "https://soundcloud.com/virtual-riot/1-virtual-riot-were-not-alone?in=virtual-riot/sets/virtual-riot-were-not-alone-remixes-out-now"
 };
 
 function init() {
 
-    camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 1, 2400);
-    camera.position.z = 400;
+    camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 1, 2000);
+    camera.position.z = 800;
+ 
+    
 
     scene = new THREE.Scene();
+   
+    for (var i = cubeQuantity - 1; i >= 0; i--) {
+
+        particleGeometry = new THREE.CircleGeometry(30, 30);
+        particleMaterial = new THREE.MeshBasicMaterial({
+            color: shadeColor('ff0000', i),
+            wireframe: false,
+            reflection: 1
+        });
+
+        cubeGeometry = new THREE.BoxGeometry(10, 10, 10);
+        cubeMaterial = new THREE.MeshBasicMaterial({
+            color: shadeColor('ff0000', i),
+            wireframe: true
+        });
+
+        particleVisualizer = new THREE.Mesh(particleGeometry, particleMaterial);
+        soundWaveVisualizer = new THREE.Mesh(cubeGeometry, cubeMaterial);
+
+            particleVisualizer.position.x = Math.random() * (1 - 4000) + 2000;
+            particleVisualizer.position.y = Math.random() * (10 - 2000) + 1000;
+            particleVisualizer.position.z = Math.random() * (50 - 500) + 310;
+
+            soundWaveVisualizer.position.x = -500 + i * 10;
+            soundWaveVisualizer.position.y = -1000;
+
+
+        particleHolder.push(particleVisualizer);
+        cubeHolder.push(soundWaveVisualizer);
+
+        scene.add(particleVisualizer);
+        scene.add(soundWaveVisualizer);
+       
+    };
 
     renderer = new THREE.WebGLRenderer({canvas: visualizer, antialias: true});
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setClearColor(0xfffffff, 1);
-
-    geometry = new THREE.CircleGeometry( visualizerElement.radius, visualizerElement.segments );
+    renderer.setClearColor(0x000000, 10);
 
     document.addEventListener('mousemove', onDocumentMouseMove, false);
 }
 
 function render() {
-
     requestAnimationFrame(render);
     camera.position.x += ( - mouseX - camera.position.x ) * .20;
     camera.position.y += ( mouseY - camera.position.y ) * .20;
-    camera.position.z = -400 + (time / lineCreateFPS) * lineDistance;
-    camera.lookAt({x: 0, y: 0, z: (time / lineCreateFPS) * lineDistance});
 
-    if( time % lineCreateFPS == 0 ) {
-        cubeHolderArr = []
+    camera.lookAt(scene.position);
 
-        for (i = 0; i < visualizerElement.quantity; i++) {
+    for(i in particleHolder){
+        cubeHolder[i].scale.y = 0.1 + audioSource.streamData[i] * 1.2;
+        cubeHolder[i].scale.x = 0.1 + audioSource.streamData[i] / 40;
+        cubeHolder[i].scale.z = 0.1 + audioSource.streamData[i] / 40;
 
-            cubeVisualizer = new THREE.Mesh(geometry, visualizerElement.material);
-            
-            // Line visualizer
-            //cubeVisualizer.position.x = -750 + i * 15 ;
+        particleHolder[i].position.x += audioSource.streamData[i] / 200;
 
-            // Circle visualizer
-            cubeVisualizer.position.x = 100 * Math.cos(2 * Math.PI * i / visualizerElement.quantity);
-            cubeVisualizer.position.y = 100 * Math.sin(2 * Math.PI * i / visualizerElement.quantity);
-            cubeVisualizer.rotation.z = (((Math.PI * 2) / visualizerElement.quantity) * i) + Math.PI / 2;
+        particleHolder[i].scale.y = 0.1 + audioSource.streamData[i] / 300;
+        particleHolder[i].scale.x = 0.1 + audioSource.streamData[i] / 300;
+        particleHolder[i].scale.z = 0.1 + audioSource.streamData[i] / 300;
 
-            cubeVisualizer.position.z = (time / lineCreateFPS) * lineDistance ;
-            cubeVisualizer.scale.y = 0.1 + audioSource.streamData[i] / 25;
 
-            cubeHolderArr.push(cubeVisualizer);
 
-            scene.add(cubeVisualizer);
-
-        };
-
-        lineHolderArr.push(cubeHolderArr);
-
-        if(lineHolderArr.length > 24) {
-            for(i in lineHolderArr[0]){
-                scene.remove(lineHolderArr[0][i]);                
-            }
-            lineHolderArr.shift();
+        if(particleHolder[i].position.x > 1750) {
+            particleHolder[i].position.x = -1000;
         }
-        
     }
 
     renderer.render(scene, camera);
-    time++;
     
 }
+
 
 function onDocumentMouseMove(event) {
 
     mouseX = ( event.clientX - windowHalfX ) / 2;
     mouseY = ( event.clientY - windowHalfY ) / 2;
 }
+
 
 SC.initialize({
     client_id: soundcloud.client_id
