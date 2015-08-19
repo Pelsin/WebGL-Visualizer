@@ -7,6 +7,7 @@ var controls;
 var radiansHeight, radiansWidth;
 var windowHalfX = window.innerWidth / 2;
 var windowHalfY = window.innerHeight / 2;
+var catVisualizer;
 
 var visualizer = document.getElementById("visualizer");
 var player = document.getElementById('player');
@@ -31,6 +32,15 @@ function init() {
     particleGeometry = new THREE.CircleGeometry(30, 30);
     geometry = new THREE.Geometry();
     line = new THREE.Line(geometry, material);
+
+    var catGeometry = new THREE.PlaneGeometry(100, 100);
+    var catMaterial = new THREE.MeshBasicMaterial( {side:THREE.DoubleSide, map: THREE.ImageUtils.loadTexture('assets/textures/cat.png'), depthWrite: false, depthTest: false, transparent: true, opacity: 0.9 });
+    catVisualizer = new THREE.Mesh(catGeometry, catMaterial);
+    catVisualizer.position.x = 1100 * Math.cos(360 * Math.PI / 180) * Math.sin(360 * Math.PI / 180);
+    catVisualizer.position.y = 1100 * Math.sin(360 * Math.PI / 180) * Math.sin(360 * Math.PI / 180);
+    catVisualizer.position.z = 1100 * Math.cos(360 * Math.PI / 180);
+
+    scene.add(catVisualizer);
 
     var ambient = new THREE.AmbientLight( 0x555555 );
     scene.add(ambient);
@@ -74,6 +84,12 @@ function init() {
     //document.addEventListener('mousemove', onDocumentMouseMove, false);
 }
 
+var catDegree = 360;
+var catPosition = 1;
+
+var catDegreeChangeValue;
+var catPositionChangeValue;
+
 function render() {
     
     requestAnimationFrame(render);
@@ -81,6 +97,22 @@ function render() {
     //camera.position.y += ( mouseY - camera.position.y ) * .20;
 
     camera.lookAt(scene.position);
+
+    if(catDegree >= 360) {
+        catDegreeChangeValue = -2;
+    } else if(catDegree <= 0) {
+        catDegreeChangeValue = 2;
+    }
+
+    if(catPosition >= 1100) {
+        catPositionChangeValue = -2;
+    } else if(catPosition <= 1) {
+        catPositionChangeValue = 2;
+    }
+
+    catPosition =  catPosition + catPositionChangeValue;
+    catDegree = catDegree + catDegreeChangeValue;
+
 
     for(i in lineHolder){
         line.geometry.vertices[i].y = audioSource.streamData[i];
@@ -97,14 +129,23 @@ function render() {
         }
 
 
-        particle.position.x = (sphereRadius - audioSource.volume / 100) * Math.cos(particle.radiansHeight) * Math.sin(particle.radiansWidth);
-        particle.position.y = (sphereRadius - audioSource.volume / 100) * Math.sin(particle.radiansHeight) * Math.sin(particle.radiansWidth);
-        particle.position.z = (sphereRadius - audioSource.volume / 100) * Math.cos(particle.radiansWidth);
+        particle.position.x = (sphereRadius - audioSource.streamData[i] / 100) * Math.cos(particle.radiansHeight) * Math.sin(particle.radiansWidth);
+        particle.position.y = (sphereRadius - audioSource.streamData[i] / 100) * Math.sin(particle.radiansHeight) * Math.sin(particle.radiansWidth);
+        particle.position.z = (sphereRadius - audioSource.streamData[i] / 100) * Math.cos(particle.radiansWidth);
+
         particle.lookAt(camera.position);
     }
+
+        catVisualizer.position.x = (sphereRadius - catPosition) * Math.cos(catDegree * Math.PI / 180) * Math.sin(catDegree * Math.PI / 180);
+        catVisualizer.position.y = (sphereRadius - catPosition) * Math.sin(catDegree * Math.PI / 180) * Math.sin(catDegree * Math.PI / 180);
+        catVisualizer.position.z = (sphereRadius - catPosition) * Math.cos(catDegree * Math.PI / 180);
+
+        catVisualizer.scale.x = catVisualizer.scale.y = audioSource.volume / 1500;
+
+
+    catVisualizer.lookAt(camera.position);
     line.geometry.verticesNeedUpdate = true;
     renderer.render(scene, camera);
-    
 }
 
 /*
