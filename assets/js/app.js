@@ -71,7 +71,7 @@ function init() {
     controls = new THREE.OrbitControls( camera, renderer.domElement );
 
 
-    document.addEventListener('mousemove', onDocumentMouseMove, false);
+    //document.addEventListener('mousemove', onDocumentMouseMove, false);
 }
 
 function render() {
