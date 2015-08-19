@@ -2,7 +2,8 @@ var camera, scene, renderer;
 var geometry, material, particle, line;
 var lineHolder = [];
 var particleHolder = [];
-var mouseX = 0, mouseY = 0;
+//var mouseX = 0, mouseY = 0;
+var controls;
 var radiansHeight, radiansWidth;
 var windowHalfX = window.innerWidth / 2;
 var windowHalfY = window.innerHeight / 2;
@@ -26,6 +27,7 @@ function init() {
     
     scene = new THREE.Scene();
 
+    
     particleGeometry = new THREE.CircleGeometry(30, 30);
     geometry = new THREE.Geometry();
     line = new THREE.Line(geometry, material);
@@ -41,7 +43,7 @@ function init() {
 
     for (var i = particleQuantity - 1; i >= 0; i--) {
 
-        particleMaterial = new THREE.MeshBasicMaterial( {side:THREE.DoubleSide, map: THREE.ImageUtils.loadTexture('assets/img/flare.png'), depthWrite: false, depthTest: false, transparent: true });
+        particleMaterial = new THREE.MeshBasicMaterial( {side:THREE.DoubleSide, map: THREE.ImageUtils.loadTexture('assets/img/flare.png'), depthWrite: false, depthTest: false, transparent: true, opacity: 0.9 });
 
         particleVisualizer = new THREE.Mesh(particleGeometry, particleMaterial);
 
@@ -66,14 +68,17 @@ function init() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor(0x000000, 10);
 
+    controls = new THREE.OrbitControls( camera, renderer.domElement );
+
+
     document.addEventListener('mousemove', onDocumentMouseMove, false);
 }
 
 function render() {
     
     requestAnimationFrame(render);
-    camera.position.x += ( - mouseX - camera.position.x ) * .20;
-    camera.position.y += ( mouseY - camera.position.y ) * .20;
+    //camera.position.x += ( - mouseX - camera.position.x ) * .20;
+    //camera.position.y += ( mouseY - camera.position.y ) * .20;
 
     camera.lookAt(scene.position);
 
@@ -85,8 +90,12 @@ function render() {
         particle = particleHolder[i];
 
         particle.scale.y = particle.scale.x = particle.scale.z = 0.1 + audioSource.streamData[i] / 80;
-        particle.radiansHeight = particle.radiansHeight + (Math.random() ) / 200;
-        particle.radiansWidth = particle.radiansWidth + (Math.random() - 0.5) / 200;
+
+        if(audioSource.streamData[i] != 0) {
+            particle.radiansHeight = particle.radiansHeight + (Math.random() ) / 200;
+            particle.radiansWidth = particle.radiansWidth + (Math.random() - 0.5) / 200;
+        }
+
 
         particle.position.x = (sphereRadius - audioSource.volume / 100) * Math.cos(particle.radiansHeight) * Math.sin(particle.radiansWidth);
         particle.position.y = (sphereRadius - audioSource.volume / 100) * Math.sin(particle.radiansHeight) * Math.sin(particle.radiansWidth);
@@ -98,11 +107,13 @@ function render() {
     
 }
 
+/*
 function onDocumentMouseMove(event) {
 
     mouseX = ( event.clientX - windowHalfX ) / 2;
     mouseY = ( event.clientY - windowHalfY ) / 2;
 }
+*/
 
 
 SC.initialize({
