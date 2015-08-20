@@ -1,5 +1,5 @@
 var camera, scene, renderer;
-var geometry, material, particle, line;
+var geometry, particleMaterial, particle, line;
 var lineHolder = [];
 var particleHolder = [];
 //var mouseX = 0, mouseY = 0;
@@ -22,15 +22,20 @@ var soundcloud = {
 
 function init() {
 
-    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 7000);
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 100000);
     camera.position.z = 800;
     
     scene = new THREE.Scene();
-
     
+    // Lensflare material
+    //particleMaterial = new THREE.MeshBasicMaterial( {side:THREE.DoubleSide, map: THREE.ImageUtils.loadTexture('assets/img/flare.png'), depthWrite: false, depthTest: false, transparent: true, opacity: 0.9 });
+
+    // Material that will react to light
+    //particleMaterial = new THREE.MeshNormalMaterial();
+
     particleGeometry = new THREE.CircleGeometry(30, 30);
     geometry = new THREE.Geometry();
-    line = new THREE.Line(geometry, material);
+    line = new THREE.Line(geometry);
 
     var ambient = new THREE.AmbientLight( 0x555555 );
     scene.add(ambient);
@@ -42,8 +47,6 @@ function init() {
 
 
     for (var i = particleQuantity - 1; i >= 0; i--) {
-
-        particleMaterial = new THREE.MeshBasicMaterial( {side:THREE.DoubleSide, map: THREE.ImageUtils.loadTexture('assets/img/flare.png'), depthWrite: false, depthTest: false, transparent: true, opacity: 0.9 });
 
         particleVisualizer = new THREE.Mesh(particleGeometry, particleMaterial);
 
