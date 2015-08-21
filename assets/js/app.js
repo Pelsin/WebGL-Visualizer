@@ -33,7 +33,7 @@ function init() {
     geometry = new THREE.Geometry();
     line = new THREE.Line(geometry, material);
 
-    var catGeometry = new THREE.PlaneGeometry(100, 100);
+    var catGeometry = new THREE.PlaneGeometry(30, 30);
     var catMaterial = new THREE.MeshBasicMaterial( {side:THREE.DoubleSide, map: THREE.ImageUtils.loadTexture('assets/textures/cat.png'), depthWrite: false, depthTest: false, transparent: true, opacity: 0.9 });
     catVisualizer = new THREE.Mesh(catGeometry, catMaterial);
     catVisualizer.position.x = 1100 * Math.cos(360 * Math.PI / 180) * Math.sin(360 * Math.PI / 180);
@@ -140,7 +140,7 @@ function render() {
         catVisualizer.position.y = (sphereRadius - catPosition) * Math.sin(catDegree * Math.PI / 180) * Math.sin(catDegree * Math.PI / 180);
         catVisualizer.position.z = (sphereRadius - catPosition) * Math.cos(catDegree * Math.PI / 180);
 
-        catVisualizer.scale.x = catVisualizer.scale.y = audioSource.volume / 1500;
+        catVisualizer.scale.x = catVisualizer.scale.y = audioSource.volume / 1200;
 
 
     catVisualizer.lookAt(camera.position);
