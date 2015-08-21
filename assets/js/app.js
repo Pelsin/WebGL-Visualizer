@@ -2,12 +2,12 @@ var camera, scene, renderer;
 var geometry, material, particle, line;
 var lineHolder = [];
 var particleHolder = [];
+var avatar = new Object();
 //var mouseX = 0, mouseY = 0;
 var controls;
 var radiansHeight, radiansWidth;
 var windowHalfX = window.innerWidth / 2;
 var windowHalfY = window.innerHeight / 2;
-var catVisualizer;
 
 var visualizer = document.getElementById("visualizer");
 var player = document.getElementById('player');
@@ -18,7 +18,7 @@ var sphereRadius = 1000;
 // Soundcloud settings
 var soundcloud = {
     client_id: "87ee0a4c261efe6aebf22dfc94777af3",
-    request_url: "https://soundcloud.com/virtual-riot/1-virtual-riot-were-not-alone?in=virtual-riot/sets/virtual-riot-were-not-alone-remixes-out-now"
+    request_url: ""//"https://soundcloud.com/virtual-riot/1-virtual-riot-were-not-alone?in=virtual-riot/sets/virtual-riot-were-not-alone-remixes-out-now"
 };
 
 function init() {
@@ -28,19 +28,9 @@ function init() {
     
     scene = new THREE.Scene();
 
-    
     particleGeometry = new THREE.CircleGeometry(30, 30);
     geometry = new THREE.Geometry();
     line = new THREE.Line(geometry, material);
-
-    var catGeometry = new THREE.PlaneGeometry(30, 30);
-    var catMaterial = new THREE.MeshBasicMaterial( {side:THREE.DoubleSide, map: THREE.ImageUtils.loadTexture('assets/textures/cat.png'), depthWrite: false, depthTest: false, transparent: true, opacity: 0.9 });
-    catVisualizer = new THREE.Mesh(catGeometry, catMaterial);
-    catVisualizer.position.x = 1100 * Math.cos(360 * Math.PI / 180) * Math.sin(360 * Math.PI / 180);
-    catVisualizer.position.y = 1100 * Math.sin(360 * Math.PI / 180) * Math.sin(360 * Math.PI / 180);
-    catVisualizer.position.z = 1100 * Math.cos(360 * Math.PI / 180);
-
-    scene.add(catVisualizer);
 
     var ambient = new THREE.AmbientLight( 0x555555 );
     scene.add(ambient);
@@ -48,8 +38,6 @@ function init() {
     var light = new THREE.DirectionalLight( 0xffffff );
     light.position = camera.position;
     scene.add(light);
-
-
 
     for (var i = particleQuantity - 1; i >= 0; i--) {
 
@@ -80,15 +68,9 @@ function init() {
 
     controls = new THREE.OrbitControls( camera, renderer.domElement );
 
-
+    initAvatar();
     //document.addEventListener('mousemove', onDocumentMouseMove, false);
 }
-
-var catDegree = 360;
-var catPosition = 1;
-
-var catDegreeChangeValue;
-var catPositionChangeValue;
 
 function render() {
     
@@ -97,22 +79,6 @@ function render() {
     //camera.position.y += ( mouseY - camera.position.y ) * .20;
 
     camera.lookAt(scene.position);
-
-    if(catDegree >= 360) {
-        catDegreeChangeValue = -2;
-    } else if(catDegree <= 0) {
-        catDegreeChangeValue = 2;
-    }
-
-    if(catPosition >= 1100) {
-        catPositionChangeValue = -2;
-    } else if(catPosition <= 1) {
-        catPositionChangeValue = 2;
-    }
-
-    catPosition =  catPosition + catPositionChangeValue;
-    catDegree = catDegree + catDegreeChangeValue;
-
 
     for(i in lineHolder){
         line.geometry.vertices[i].y = audioSource.streamData[i];
@@ -136,14 +102,7 @@ function render() {
         particle.lookAt(camera.position);
     }
 
-        catVisualizer.position.x = (sphereRadius - catPosition) * Math.cos(catDegree * Math.PI / 180) * Math.sin(catDegree * Math.PI / 180);
-        catVisualizer.position.y = (sphereRadius - catPosition) * Math.sin(catDegree * Math.PI / 180) * Math.sin(catDegree * Math.PI / 180);
-        catVisualizer.position.z = (sphereRadius - catPosition) * Math.cos(catDegree * Math.PI / 180);
-
-        catVisualizer.scale.x = catVisualizer.scale.y = audioSource.volume / 1200;
-
-
-    catVisualizer.lookAt(camera.position);
+    avatarAnimation();
     line.geometry.verticesNeedUpdate = true;
     renderer.render(scene, camera);
 }
@@ -171,6 +130,87 @@ SC.get('/resolve', { url: soundcloud.request_url }, function (response) {
         player.play();
     }
 });
+
+//Testing avatar
+
+var avatarLegsArr = [];
+var avatarHead;
+var avatarArmsArr = [];
+var avatarLegs;
+
+
+var initAvatar = function() {
+    initAvatarLegs();
+    initAvatarHead();
+    initAvatarArms();
+    initAvatarBody();
+};
+
+var initAvatarLegs = function() {
+
+    for(var i = 0; i < 2; i++) {
+        var legGeometry = new THREE.BoxGeometry(10, 30, 10);
+        legGeometry.applyMatrix(new THREE.Matrix4().makeTranslation( 0, 30/2, 0 ))
+        var legMaterial = new THREE.MeshBasicMaterial({wireframe: true});
+        var legVisualizer = new THREE.Mesh(legGeometry, legMaterial);
+
+        avatarLegsArr.push(legVisualizer);
+        scene.add(legVisualizer);
+    }
+
+    avatarLegsArr[0].position.x = 15;
+    avatarLegsArr[1].position.x = -15;
+    avatarLegsArr[0].position.y = avatarLegsArr[1].position.y = -15;
+}
+
+var initAvatarHead = function() {
+    var headGeometry = new THREE.BoxGeometry(10, 10, 10);
+    var headMaterial = new THREE.MeshBasicMaterial({wireframe: true});
+    var headVisualizer = new THREE.Mesh(headGeometry, headMaterial);
+
+    scene.add(headVisualizer);
+
+    headVisualizer.position.y = 25;
+}
+
+var initAvatarArms = function() {
+
+    for(var i = 0; i < 2; i++) {
+        var armsGeometry = new THREE.BoxGeometry(7, 7, 30);
+        var armsMaterial = new THREE.MeshBasicMaterial({wireframe: true});
+        var armsVisualizer = new THREE.Mesh(armsGeometry, armsMaterial);
+
+        avatarArmsArr.push(armsVisualizer);
+        scene.add(armsVisualizer);
+    }
+
+    avatarArmsArr[0].position.x = 13;
+    avatarArmsArr[1].position.x = -13;
+    avatarArmsArr[0].position.y = avatarArmsArr[1].position.y = 10;
+    avatarArmsArr[0].position.z = avatarArmsArr[1].position.z = 10;
+
+}
+
+var initAvatarBody = function () {
+    var bodyGeometry = new THREE.BoxGeometry(20, 40, 10);
+    var bodyMaterial = new THREE.MeshBasicMaterial({wireframe: true});
+    var bodyVisualizer = new THREE.Mesh(bodyGeometry, bodyMaterial);
+    scene.add(bodyVisualizer);
+}
+
+var avatarAnimation = function() {
+
+   avatarLegsArr[1].rotation.x = 3.7;
+   var legRotationValue;
+
+    if(avatarLegsArr[1].rotation.x >= 3.6) {
+        legRotationValue = -0.1;
+    } else if(avatarLegsArr[1].rotation.x <= 2.6) {
+        legRotationValue = 0.1;
+    }
+
+    avatarLegsArr[1].rotation.x += legRotationValue;
+}
 
 var SoundCloudAudioSource = function (player) {
     var self = this;
