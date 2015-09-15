@@ -8,11 +8,19 @@ var radiansHeight, radiansWidth;
 var windowHalfX = window.innerWidth / 2;
 var windowHalfY = window.innerHeight / 2;
 var catVisualizer;
+var uniCatVisualizer;
+var breadCat;
+var catArray = [];
+var audioTime;
+var neonCatVisualizer;
+
+
 
 var visualizer = document.getElementById("visualizer");
 var player = document.getElementById('player');
 
 var particleQuantity = 127;
+var catQuantity = 0;
 var sphereRadius = 1000;
 
 // Soundcloud settings
@@ -20,18 +28,14 @@ var soundcloud = {
     client_id: "87ee0a4c261efe6aebf22dfc94777af3",
     request_url: "https://soundcloud.com/feral84/two-steps-from-hell-strength"
 };
-    var lineHolderArr = [];
-    var cubeHolderArr = [];
-    var visualizerElement = {
-    quantity: 100,
-    radius: 5,
-    segments: 10,
-    material: new THREE.MeshBasicMaterial({color: 0x605d5d, wireframe: true})
-    };
-    var visualizerEleQuantity = 100;
-    var lineCreateFPS = 3;
-    var lineDistance = 25;
-    var time = 0;
+
+function randomBetween(min, max) {
+    if (min < 0) {
+        return min + Math.random() * (Math.abs(min)+max);
+    }else {
+        return min + Math.random() * max;
+    }
+}
 
 function init() {
 
@@ -40,20 +44,31 @@ function init() {
     
     scene = new THREE.Scene();
 
-    geometry = new THREE.CircleGeometry( visualizerElement.radius, visualizerElement.segments );
-
+    
     particleGeometry = new THREE.CircleGeometry(10, 10);
     geometry = new THREE.Geometry();
     line = new THREE.Line(geometry, material);
 
-    var catGeometry = new THREE.PlaneGeometry(30, 30);
-    var catMaterial = new THREE.MeshBasicMaterial( {side:THREE.DoubleSide, map: THREE.ImageUtils.loadTexture('assets/textures/cat.png'), depthWrite: false, depthTest: false, transparent: true, opacity: 0.9 });
+    var catGeometry = new THREE.PlaneGeometry(200, 200);
+    var catMaterial = new THREE.MeshBasicMaterial( {side:THREE.DoubleSide, map: THREE.ImageUtils.loadTexture('assets/textures/cat.png'), depthWrite: false, depthTest: false, transparent: true, opacity: 1 });
     catVisualizer = new THREE.Mesh(catGeometry, catMaterial);
-    catVisualizer.position.x = 1100 * Math.cos(360 * Math.PI / 180) * Math.sin(360 * Math.PI / 180);
-    catVisualizer.position.y = 1100 * Math.sin(360 * Math.PI / 180) * Math.sin(360 * Math.PI / 180);
-    catVisualizer.position.z = 1100 * Math.cos(360 * Math.PI / 180);
 
-    scene.add(catVisualizer);
+    var uniCatGeometry = new THREE.PlaneGeometry(200, 200);
+    var uniCatMaterial = new THREE.MeshBasicMaterial( {side:THREE.DoubleSide, map: THREE.ImageUtils.loadTexture('assets/textures/unicat.png'), depthWrite: false, depthTest: false, transparent: true, opacity: 1 });
+    uniCatVisualizer = new THREE.Mesh(uniCatGeometry, uniCatMaterial);
+
+    uniCatVisualizer.position.z = -300;
+    uniCatVisualizer.position.y = 300;
+    uniCatVisualizer.position.x = 300;
+
+    var breadCatGeometry = new THREE.PlaneGeometry(200, 200);
+    var breadCatMaterial = new THREE.MeshBasicMaterial( {side:THREE.DoubleSide, map: THREE.ImageUtils.loadTexture('assets/textures/breadcat.gif'), depthWrite: false, depthTest: false, transparent: true, opacity: 1 });
+    breadCatVisualizer = new THREE.Mesh(breadCatGeometry, breadCatMaterial);
+
+    breadCatVisualizer.position.z = 300;
+    breadCatVisualizer.position.y = 300;
+    breadCatVisualizer.position.x = -300;
+    
 
     var ambient = new THREE.AmbientLight( 0x555555 );
     scene.add(ambient);
@@ -62,6 +77,16 @@ function init() {
     light.position = camera.position;
     scene.add(light);
 
+    for(var i = 0; i < 50; i++) {
+        var neonCatGeometry = new THREE.PlaneGeometry(50, 100);
+        var neonCatMaterial = new THREE.MeshBasicMaterial( {side:THREE.DoubleSide, map: THREE.ImageUtils.loadTexture('assets/textures/standingcat.png'), depthWrite: false, depthTest: false, transparent: true, opacity: 1 });
+        neonCatVisualizer = new THREE.Mesh(neonCatGeometry, neonCatMaterial);
+        neonCatVisualizer.position.y = 1000;
+        neonCatVisualizer.position.x = randomBetween(-800, 800);
+        neonCatVisualizer.position.z = randomBetween(-800, 800);
+        
+        catArray.push(neonCatVisualizer);
+    }
 
 
     for (var i = particleQuantity - 1; i >= 0; i--) {
@@ -103,73 +128,59 @@ var catPosition = 1;
 var catDegreeChangeValue;
 var catPositionChangeValue;
 
+var catPopAnimation = function() {
+    if(audioTime < 47.5) {
+        if(audioTime > 21 && audioTime < 22.1) {
+            scene.add(catVisualizer);
+            
+    }
+    if(audioTime > 28 && audioTime < 28.1) {
+        scene.add(uniCatVisualizer);
+        
+    }
+    if(audioTime > 34.6 && audioTime < 34.7) {
+            scene.add(breadCatVisualizer);
+            
+        }
+    }
+
+
+    if(audioTime > 1) {
+        if(audioTime < 47.6) {
+            scene.remove(catVisualizer)
+            scene.remove(uniCatVisualizer)
+            scene.remove(breadCatVisualizer)
+        }
+
+        var i = 0, howManyTimes = 50;
+        function f() {
+            scene.add(catArray[i]);
+            catArray[i].position.y -= 30; 
+            i++;
+            if( i < howManyTimes ){
+                setTimeout( f, 100);
+            }
+        }
+        f();
+    }
+}
+
 function render() {
     
     requestAnimationFrame(render);
+    catPopAnimation();
     //camera.position.x += ( - mouseX - camera.position.x ) * .20;
     //camera.position.y += ( mouseY - camera.position.y ) * .20;
-
     camera.lookAt(scene.position);
-
-     if( time % lineCreateFPS == 0 ) {
-        cubeHolderArr = []
-
-        for (i = 0; i < visualizerElement.quantity; i++) {
-
-            cubeVisualizer = new THREE.Mesh(geometry, visualizerElement.material);
-            
-            // Line visualizer
-            //cubeVisualizer.position.x = -750 + i * 15 ;
-
-            // Circle visualizer
-            cubeVisualizer.position.x = 100 * Math.cos(2 * Math.PI * i / visualizerElement.quantity);
-            cubeVisualizer.position.y = 100 * Math.sin(2 * Math.PI * i / visualizerElement.quantity);
-            cubeVisualizer.rotation.z = (((Math.PI * 2) / visualizerElement.quantity) * i) + Math.PI / 2;
-
-            cubeVisualizer.position.z = (time / lineCreateFPS) * lineDistance ;
-            cubeVisualizer.scale.y = 0.1 + audioSource.streamData[i] / 25;
-
-            cubeHolderArr.push(cubeVisualizer);
-
-            scene.add(cubeVisualizer);
-
-        };
-
-        lineHolderArr.push(cubeHolderArr);
-
-        if(lineHolderArr.length > 24) {
-            for(i in lineHolderArr[0]){
-                scene.remove(lineHolderArr[0][i]);                
-            }
-            lineHolderArr.shift();
-        }
-        
-    }
-
-    time++;
-
-    if(catDegree >= 360) {
-        catDegreeChangeValue = -2;
-    } else if(catDegree <= 0) {
-        catDegreeChangeValue = 2;
-    }
-
-    if(catPosition >= 1100) {
-        catPositionChangeValue = -2;
-    } else if(catPosition <= 1) {
-        catPositionChangeValue = 2;
-    }
-
-    catPosition =  catPosition + catPositionChangeValue;
-    catDegree = catDegree + catDegreeChangeValue;
-
-
+    audioTime = document.getElementById("player").currentTime;
+    console.log(audioTime);
     for(i in lineHolder){
         line.geometry.vertices[i].y = audioSource.streamData[i];
     }
 
     for(i in particleHolder){
         particle = particleHolder[i];
+
 
         particle.scale.y = particle.scale.x = particle.scale.z = 0.1 + audioSource.streamData[i] / 80;
 
@@ -186,18 +197,23 @@ function render() {
         particle.lookAt(camera.position);
     }
 
-        catVisualizer.position.x = (sphereRadius - catPosition) * Math.cos(catDegree * Math.PI / 180) * Math.sin(catDegree * Math.PI / 180);
-        catVisualizer.position.y = (sphereRadius - catPosition) * Math.sin(catDegree * Math.PI / 180) * Math.sin(catDegree * Math.PI / 180);
-        catVisualizer.position.z = (sphereRadius - catPosition) * Math.cos(catDegree * Math.PI / 180);
-
-        catVisualizer.scale.x = catVisualizer.scale.y = audioSource.volume / 1200;
-
-
+    for(i in catArray){
+        if(catArray[i] != null) {
+            catArray[i].lookAt(camera.position);
+        }
+        
+    }
+    neonCatVisualizer.lookAt(camera.position);
     catVisualizer.lookAt(camera.position);
+    uniCatVisualizer.lookAt(camera.position);
+    breadCatVisualizer.lookAt(camera.position);
     line.geometry.verticesNeedUpdate = true;
     renderer.render(scene, camera);
 }
 
+var particleAnimation = function(particle) {
+
+}
 /*
 function onDocumentMouseMove(event) {
 
