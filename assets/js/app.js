@@ -18,8 +18,20 @@ var sphereRadius = 1000;
 // Soundcloud settings
 var soundcloud = {
     client_id: "87ee0a4c261efe6aebf22dfc94777af3",
-    request_url: "https://soundcloud.com/virtual-riot/1-virtual-riot-were-not-alone?in=virtual-riot/sets/virtual-riot-were-not-alone-remixes-out-now"
+    request_url: "https://soundcloud.com/feral84/two-steps-from-hell-strength"
 };
+    var lineHolderArr = [];
+    var cubeHolderArr = [];
+    var visualizerElement = {
+    quantity: 100,
+    radius: 5,
+    segments: 10,
+    material: new THREE.MeshBasicMaterial({color: 0x605d5d, wireframe: true})
+    };
+    var visualizerEleQuantity = 100;
+    var lineCreateFPS = 3;
+    var lineDistance = 25;
+    var time = 0;
 
 function init() {
 
@@ -28,8 +40,9 @@ function init() {
     
     scene = new THREE.Scene();
 
-    
-    particleGeometry = new THREE.CircleGeometry(30, 30);
+    geometry = new THREE.CircleGeometry( visualizerElement.radius, visualizerElement.segments );
+
+    particleGeometry = new THREE.CircleGeometry(10, 10);
     geometry = new THREE.Geometry();
     line = new THREE.Line(geometry, material);
 
@@ -97,6 +110,43 @@ function render() {
     //camera.position.y += ( mouseY - camera.position.y ) * .20;
 
     camera.lookAt(scene.position);
+
+     if( time % lineCreateFPS == 0 ) {
+        cubeHolderArr = []
+
+        for (i = 0; i < visualizerElement.quantity; i++) {
+
+            cubeVisualizer = new THREE.Mesh(geometry, visualizerElement.material);
+            
+            // Line visualizer
+            //cubeVisualizer.position.x = -750 + i * 15 ;
+
+            // Circle visualizer
+            cubeVisualizer.position.x = 100 * Math.cos(2 * Math.PI * i / visualizerElement.quantity);
+            cubeVisualizer.position.y = 100 * Math.sin(2 * Math.PI * i / visualizerElement.quantity);
+            cubeVisualizer.rotation.z = (((Math.PI * 2) / visualizerElement.quantity) * i) + Math.PI / 2;
+
+            cubeVisualizer.position.z = (time / lineCreateFPS) * lineDistance ;
+            cubeVisualizer.scale.y = 0.1 + audioSource.streamData[i] / 25;
+
+            cubeHolderArr.push(cubeVisualizer);
+
+            scene.add(cubeVisualizer);
+
+        };
+
+        lineHolderArr.push(cubeHolderArr);
+
+        if(lineHolderArr.length > 24) {
+            for(i in lineHolderArr[0]){
+                scene.remove(lineHolderArr[0][i]);                
+            }
+            lineHolderArr.shift();
+        }
+        
+    }
+
+    time++;
 
     if(catDegree >= 360) {
         catDegreeChangeValue = -2;
