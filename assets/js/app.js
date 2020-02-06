@@ -121,7 +121,6 @@ SC.get("/tracks/" + soundcloud.trackId).then(response => {
       response.stream_url + "?client_id=" + soundcloud.client_id
     );
     player.crossOrigin = "anonymous";
-    player.play();
   }
 });
 
